@@ -1,0 +1,23 @@
+---
+- name: Deploy Solr on EC2 with EBS Volume
+  hosts: all
+  gather_facts: false
+  collections:
+    - amazon.aws
+  become: true
+
+  vars:
+    region: ca-central-1
+    device_name: /dev/xvdf
+    volume_tag_name: "true"
+    ebs_mount_point: /mnt/data
+    ebs_device_name: "{{ device_name }}"
+
+  pre_tasks: 
+    - import_tasks: aws/install-ansible-collection-amazon.yml
+    - import_tasks: aws/get-var-env-from-ssm.yml
+    - import_tasks: aws/auto-attach-ec2-ebs.yml
+
+  tasks:
+    - import_tasks: general/install-docker.yml
+    - import_tasks: aws/deploy-solr.yml

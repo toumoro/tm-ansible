@@ -1,0 +1,7 @@
+---
+- name: Deploy Docker DNF Playbook
+  hosts: all
+  become: true
+
+  tasks:
+    - import_tasks: general/install-docker.yml

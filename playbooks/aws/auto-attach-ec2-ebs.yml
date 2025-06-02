@@ -1,0 +1,49 @@
+  - name: Get EC2 instance metadata
+    amazon.aws.ec2_metadata_facts:
+      #metadata_token_ttl_seconds: 240
+    retries: 10
+    delay: 10
+
+  - name: Set instance ID fact
+    set_fact:
+      instance_id: "{{ ansible_ec2_instance_id }}"
+
+  - name: Get volume ID by Name tag
+    amazon.aws.ec2_vol_info:
+      region: "{{ region }}"
+      filters:
+        "tag:solrdata": "{{ volume_tag_name }}"
+    register: ec2_vol_info
+
+  - name: Fail if volume not found
+    fail:
+      msg: "No volume found with tag Name={{ volume_tag_name }}"
+    when: ec2_vol_info.volumes | length == 0
+
+  - name: Attach the EBS volume to the instance
+    amazon.aws.ec2_vol:
+      region: "{{ region }}"
+      id: "{{ ec2_vol_info.volumes[0].id }}"
+      instance: "{{ instance_id }}"
+      device_name: "{{ device_name }}"
+      state: present
+    register: attach_result
+    retries: 10
+    delay: 10
+    until: attach_result is succeeded
+
+  - name: Wait for EBS volume to be attached
+    amazon.aws.ec2_vol_info:
+      region: "{{ region }}"
+      filters:
+        "volume-id": "{{ ec2_vol_info.volumes[0].id }}"
+    register: vol_check
+    retries: 100
+    delay: 5
+    until: >
+      vol_check.volumes[0].attachment_set | length > 0 and
+      vol_check.volumes[0].attachment_set[0].status == 'attached'
+
+  - name: Debug success
+    debug:
+      msg: "Volume {{ ec2_vol_info.volumes[0].id }} attached to instance {{ instance_id }}"

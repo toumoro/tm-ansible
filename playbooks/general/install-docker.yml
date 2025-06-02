@@ -1,0 +1,65 @@
+- name: Install required packages
+  dnf:
+    name:
+      - yum-utils
+      - device-mapper-persistent-data
+      - lvm2
+    state: present
+
+- name: Install Docker packages
+  dnf:
+    name:
+      - htop
+      - docker
+      - containerd
+    state: latest
+
+- name: Configure Docker log rotation
+  ansible.builtin.copy:
+    dest: /etc/docker/daemon.json
+    content: |
+      {
+        "log-driver": "json-file",
+        "log-opts": {
+          "max-size": "50m",
+          "max-file": "3"
+        }
+      }
+    owner: root
+    group: root
+    mode: '0644'
+
+- name: Start and enable Docker service
+  systemd:
+    name: docker.service
+    enabled: yes
+    state: started
+  ignore_errors: true
+
+- name: Start and enable Containerd service
+  systemd:
+    name: containerd.service
+    enabled: yes
+    state: started
+  ignore_errors: true
+
+
+- name: Add current user to docker group
+  user:
+    name: ec2-user
+    groups: docker
+    append: yes
+
+- name: Download Docker Compose binary
+  get_url:
+    url: https://github.com/docker/compose/releases/latest/download/docker-compose-linux-x86_64
+    dest: /usr/local/bin/docker-compose
+    mode: '0755'
+
+- name: Verify Docker Compose installation
+  command: docker-compose --version
+  register: docker_compose_version
+
+- name: Show Docker Compose version
+  debug:
+    var: docker_compose_version.stdout

@@ -1,0 +1,80 @@
+- name: Create mount point
+  file:
+    path: "{{ ebs_mount_point }}"
+    state: directory
+    mode: '0755'
+
+- name: Check if EBS volume is already formatted
+  command: "blkid {{ ebs_device_name }}"
+  register: blkid_output
+  ignore_errors: true
+
+- name: Format EBS volume if not formatted
+  filesystem:
+    fstype: ext4
+    dev: "{{ ebs_device_name }}"
+  when: blkid_output.rc != 0
+
+- name: Mount the EBS volume
+  mount:
+    path: "{{ ebs_mount_point }}"
+    src: "{{ ebs_device_name }}"
+    fstype: ext4
+    opts: defaults,nofail
+    state: mounted
+
+- name: Ensure mount is persisted in fstab
+  mount:
+    path: "{{ ebs_mount_point }}"
+    src: "{{ ebs_device_name }}"
+    fstype: ext4
+    opts: defaults,nofail
+    state: present
+
+- name: Change owner and group of /mnt/data
+  file:
+    path: /mnt/data
+    owner: 8983
+    group: 8983
+    recurse: yes
+    
+- name: Get EC2 instance metadata
+  amazon.aws.ec2_metadata_facts:
+  retries: 10
+  delay: 10
+
+- name: Set region AWS
+  set_fact:
+    aws_region: "{{ ansible_ec2_placement_region }}"
+
+- name: Login to Amazon ECR
+  ansible.builtin.command: >
+    aws ecr get-login-password --region {{ aws_region }} 
+  register: ecr_login
+
+- name: Login to ECR using Docker
+  ansible.builtin.command: >
+    docker login --username AWS --password {{ ecr_login.stdout }} {{ aws_account_id }}.dkr.ecr.{{ aws_region }}.amazonaws.com
+
+- name: Debug Docker image
+  ansible.builtin.debug:
+    msg: "{{ docker_image }}"
+
+- name: Pull Docker image
+  community.docker.docker_image:
+    name: "{{ docker_image }}"
+    source: pull
+
+- name: Run Docker container with env vars
+  community.docker.docker_container:
+    name: solr
+    image: "{{ docker_image }}"
+    env:
+      SOLR_OPTS: "{{ solr_opts }}"
+      SOLR_JAVA_MEM: "{{ solr_java_mem }}"
+    state: started
+    volumes:
+      - "/mnt/data:/var/solr"
+    ports:
+      - "8983:8983"
+    restart_policy: unless-stopped

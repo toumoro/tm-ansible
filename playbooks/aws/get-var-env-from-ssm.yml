@@ -1,0 +1,19 @@
+- name: Get ANSIBLE SSM Prefix
+  set_fact:
+    ssm_prefix: "{{ lookup('amazon.aws.aws_ssm', '/Ansible/prefix/ssm', region=region) }}"
+
+- name: Get Container Image from SSM
+  set_fact:
+    docker_image: "{{ lookup('amazon.aws.aws_ssm', ssm_prefix ~ '/DOCKER_IMAGE', region=region) }}"
+
+- name: Get Solr Options from SSM
+  set_fact:
+    solr_opts: "{{ lookup('amazon.aws.aws_ssm', ssm_prefix ~ '/SOLR_OPTS', region=region) }}"
+
+- name: Get Solr JAVA Memory from SSM
+  set_fact:
+    solr_java_mem: "{{ lookup('amazon.aws.aws_ssm', ssm_prefix ~ '/SOLR_JAVA_MEM', region=region) }}"
+
+- name: Get AWS Account ID from SSM
+  set_fact:
+    aws_account_id: "{{ lookup('amazon.aws.aws_ssm', ssm_prefix ~ '/AWS_ACCOUNT', region=region) }}"
