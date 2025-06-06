@@ -1,18 +1,15 @@
-- name: Install required packages
-  dnf:
-    name:
-      - yum-utils
-      - device-mapper-persistent-data
-      - lvm2
-    state: present
 
-- name: Install Docker packages
-  dnf:
-    name:
-      - htop
-      - docker
-      - containerd
-    state: latest
+- name: Install Docker in Debians and Ubuntu systems
+  import_tasks: docker/install-docker-debian.yml
+  when: ansible_os_family == "Debian"
+
+- name: Install Docker in RedHat likes systems
+  import_tasks: docker/install-docker-redhat.yml
+  when: ansible_distribution != "Amazon" and ansible_os_family == "RedHat"
+
+- name: Install Docker in Amazon like systems
+  import_tasks: docker/install-docker-amazon.yml
+  when: ansible_distribution == "Amazon"
 
 - name: Configure Docker log rotation
   ansible.builtin.copy:
@@ -29,6 +26,23 @@
     group: root
     mode: '0644'
 
+- name: Create Docker systemd override directory
+  file:
+    path: /etc/systemd/system/docker.service.d
+    state: directory
+    mode: '0755'
+  when: proxy_url is defined and proxy_url != ""
+
+- name: Configure Docker proxy
+  copy:
+    dest: /etc/systemd/system/docker.service.d/http-proxy.conf
+    content: |
+      [Service]
+      Environment="HTTP_PROXY=http://{{ proxy_url }}" 
+      Environment="HTTPS_PROXY=http://{{ proxy_url }}"
+    mode: '0644'
+  when: proxy_url is defined and proxy_url != ""
+
 - name: Start and enable Docker service
   systemd:
     name: docker.service
@@ -43,12 +57,19 @@
     state: started
   ignore_errors: true
 
-
 - name: Add current user to docker group
   user:
     name: ec2-user
     groups: docker
     append: yes
+  when: ansible_distribution == "Amazon"
+  
+- name: Add current user to docker group
+  user:
+    name: "{{ ansible_user_id }}"
+    groups: docker
+    append: yes
+  when: ansible_distribution != "Amazon"
 
 - name: Download Docker Compose binary
   get_url:

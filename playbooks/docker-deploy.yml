@@ -1,7 +1,15 @@
 ---
-- name: Deploy Docker DNF Playbook
+- name: Deploy Docker Playbook
   hosts: all
   become: true
 
+  pre_tasks:
+    - name: Check proxy configuration
+      import_tasks: general/configuration-proxy.yml
+      when: proxy_address is defined and proxy_address != ""
+
   tasks:
-    - import_tasks: general/install-docker.yml
+    - name: Ensure common packages are installed
+      import_tasks: general/install-common-packages.yml
+    - name: Ensure Docker is installed
+      import_tasks: general/install-docker.yml

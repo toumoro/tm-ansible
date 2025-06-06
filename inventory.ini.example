@@ -1,0 +1,8 @@
+[redhat]
+i-XXX
+
+[debian]
+i-XXX ansible_user=ubuntu
+
+[proxy]
+i-XXX ansible_user=ubuntu extra_vars="proxy_address=proxy.example.com:8080"

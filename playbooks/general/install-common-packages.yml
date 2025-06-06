@@ -1,0 +1,8 @@
+    - name: Ensure packages are installed
+      package:
+        name:
+          - htop
+          - wget
+          - git
+          - vim
+        state: present

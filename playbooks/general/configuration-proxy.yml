@@ -1,0 +1,46 @@
+- name: Ensure /etc/profile.d/proxy.sh exists
+  copy:
+    dest: /etc/profile.d/tm_proxy.sh
+    content: |
+      export http_proxy=http://{{ proxy_address }}
+      export https_proxy=https://{{ proxy_address }}
+      export HTTP_PROXY=http://{{ proxy_address }}
+      export HTTPS_PROXY=https://{{ proxy_address }}
+    mode: '0755'
+    owner: root
+    group: root
+
+- name: Configure APT proxy (Debian/Ubuntu)
+  copy:
+    dest: /etc/apt/apt.conf.d/99tm_proxy
+    content: |
+      Acquire::http::Proxy "http://{{ proxy_address }}";
+      Acquire::https::Proxy "http://{{ proxy_address }}";
+  when: ansible_os_family == "Debian"
+
+- name: Configure YUM/DNF proxy (RHEL/CentOS/Fedora)
+  lineinfile:
+    path: /etc/yum.conf
+    line: "proxy=http://{{ proxy_address }}"
+    create: yes
+    insertafter: "[main]"
+  when: ansible_os_family == "RedHat"
+
+- name: Ensure ~/.ssh directory exists
+  file:
+    path: "{{ ansible_env.HOME }}/.ssh"
+    state: directory
+    mode: '0700'
+    owner: "{{ ansible_user_id }}"
+    group: "{{ ansible_user_gid | default(ansible_user_id) }}"
+
+- name: Configure Git proxy in SSH config
+  copy:
+    dest: "{{ ansible_env.HOME }}/.ssh/config"
+    content: |
+      Host github.com
+        User git
+        ProxyCommand nc --proxy {{ proxy_address }} %h %p
+    mode: '0644'
+    owner: "{{ ansible_user_id }}"
+    group: "{{ ansible_user_gid | default(ansible_user_id) }}"

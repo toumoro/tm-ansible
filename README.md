@@ -24,3 +24,9 @@ These playbooks automate tasks such as:
 ```bash
 ansible-playbook -i 'i-000000000000' playbooks/docker-deploy.yml
 ```
+
+### 2. Setup built-in module that gathers facts about remote hosts
+
+```bash
+ansible all -i inventory.ini -m setup
+```
