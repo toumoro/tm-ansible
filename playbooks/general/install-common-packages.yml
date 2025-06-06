@@ -1,8 +1,14 @@
-    - name: Ensure packages are installed
-      package:
-        name:
-          - htop
-          - wget
-          - git
-          - vim
-        state: present
+- name: Ensure packages are installed
+  package:
+    name:
+      - htop
+      - wget
+      - git
+      - vim
+    state: present
+
+- name: Ensure crontab is installed
+  package:
+    name: cronie
+    state: present
+  when: ansible_distribution == "Amazon"

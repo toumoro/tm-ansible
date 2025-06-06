@@ -11,6 +11,9 @@
   import_tasks: docker/install-docker-amazon.yml
   when: ansible_distribution == "Amazon"
 
+- name: Configure Crontab Docker
+  import_tasks: docker/crontab.yml
+
 - name: Configure Docker log rotation
   ansible.builtin.copy:
     dest: /etc/docker/daemon.json

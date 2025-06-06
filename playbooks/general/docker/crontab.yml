@@ -1,0 +1,7 @@
+- name: Configure daily Docker system prune at 3:00 AM
+  cron:
+    name: "Daily Docker system prune"
+    minute: "0"
+    hour: "3"
+    job: "/usr/bin/docker system prune --force > /dev/null 2>&1"
+    user: "root"
