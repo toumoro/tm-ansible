@@ -1,0 +1,33 @@
+services:
+  traefik:
+    image: traefik:2.11
+    container_name: traefik
+    volumes:
+      - ./traefik:/traefik
+      - /var/run/docker.sock:/var/run/docker.sock
+    ports:
+      - 80:80
+      - 443:443
+    command:
+      - "--api"
+      - "--providers.docker=true"
+      - "--providers.docker.exposedByDefault=false"
+      - "--entrypoints.http=true"
+      - "--entrypoints.http.address=:80"
+      - "--entrypoints.http.http.redirections.entrypoint.to=https"
+      - "--entrypoints.http.http.redirections.entrypoint.scheme=https"
+      - "--entrypoints.https=true"
+      - "--entrypoints.https.address=:443"
+      - "--certificatesResolvers.letsencrypt.acme.email=noreply@toumoro.com"
+      - "--certificatesResolvers.letsencrypt.acme.storage=/traefik/acme.json"
+      - "--certificatesResolvers.letsencrypt.acme.httpChallenge.entryPoint=http"
+      # Logs
+      - "--log=true"
+      - "--log.level=DEBUG"
+    restart: unless-stopped
+    networks:
+      - traefik
+
+networks:
+  traefik:
+    name: traefik

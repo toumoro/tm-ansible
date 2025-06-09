@@ -1,0 +1,8 @@
+---
+- name: Deploy Traefik Playbook
+  hosts: all
+
+  tasks:
+  - name: Configure Traefik
+    import_tasks: traefik/configure-traefik.yml
+    become: true
