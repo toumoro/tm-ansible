@@ -1,15 +1,17 @@
 ---
 - name: Deploy Docker Playbook
   hosts: all
-  become: true
 
   pre_tasks:
     - name: Check proxy configuration
       import_tasks: general/configuration-proxy.yml
+      become: true
       when: proxy_address is defined and proxy_address != ""
 
   tasks:
     - name: Ensure common packages are installed
       import_tasks: general/install-common-packages.yml
+      become: true
     - name: Ensure Docker is installed
       import_tasks: general/install-docker.yml
+      become: true

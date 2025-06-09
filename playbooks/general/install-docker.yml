@@ -60,14 +60,14 @@
     state: started
   ignore_errors: true
 
-- name: Add current user to docker group
+- name: Add current user to docker group in Amazon systems
   user:
     name: ec2-user
     groups: docker
     append: yes
   when: ansible_distribution == "Amazon"
   
-- name: Add current user to docker group
+- name: Add current user to docker group in non-Amazon systems
   user:
     name: "{{ ansible_user_id }}"
     groups: docker
