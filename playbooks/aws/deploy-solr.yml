@@ -74,7 +74,7 @@
       SOLR_JAVA_MEM: "{{ solr_java_mem }}"
     state: started
     volumes:
-      - "/mnt/data:/var/solr"
+      - "/mnt/data:/var/solr/data/data"
     ports:
       - "8983:8983"
     restart_policy: unless-stopped
