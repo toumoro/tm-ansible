@@ -1,7 +1,7 @@
 ---
 - name: Deploy Solr on EC2 with EBS Volume
   hosts: all
-  gather_facts: false
+  gather_facts: true
   collections:
     - amazon.aws
   become: true
