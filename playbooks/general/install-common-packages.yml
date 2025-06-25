@@ -12,3 +12,10 @@
     name: cronie
     state: present
   when: ansible_distribution == "Amazon"
+
+- name: Start and enable Crond service
+  systemd:
+    name: crond.service
+    enabled: yes
+    state: started
+  when: ansible_distribution == "Amazon"
