@@ -8,6 +8,11 @@
       become: true
       when: proxy_address is defined and proxy_address != ""
 
+    - name: Check if SWAP is configured
+      import_tasks: general/configuration-swap.yml
+      become: true
+      when: ansible_swaptotal_mb | int == 0
+
   tasks:
     - name: Ensure common packages are installed
       import_tasks: general/install-common-packages.yml

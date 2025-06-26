@@ -1,0 +1,30 @@
+- name: Check if SWAP file is already formatted
+  command: "blkid /swapfile"
+  register: blkid_output
+  ignore_errors: true
+
+- name: Create a file with specific size and attributes, to be used as swap space
+  community.general.filesize:
+    path: /swapfile
+    size: 4G
+    blocksize: 512B
+    mode: u=rw,go=
+    owner: root
+    group: root
+
+- name: Format EBS volume if not formatted
+  filesystem:
+    fstype: swap
+    dev: "/swapfile"
+  when: blkid_output.rc != 0
+
+- name: Make swap persistent in /etc/fstab
+  mount:
+    name: none
+    src: /swapfile
+    fstype: swap
+    opts: sw
+    state: present
+
+- name: Enable swap
+  command: "swapon /swapfile"
