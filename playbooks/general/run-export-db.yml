@@ -1,0 +1,58 @@
+- name: List of tables to exclude from mysqldump
+  set_fact:
+    exclude_tables:
+      - be_users
+      - sys_domain
+      - sys_file_storage
+      - sys_history
+
+- name: Debug
+  debug:
+    msg: "-u{{ database_username }} -p{{ database_password }} -h{{ database_hostname }} {{ database_name }}"
+
+- name: Build mysqldump command
+  set_fact:
+    mysqldump_cmd_base: >-
+        mysqldump --default-character-set=utf8mb4 --set-gtid-purged=OFF
+        --quick --single-transaction --no-tablespaces 
+        -u{{ database_username }} -p{{ database_password }} -h{{ database_hostname }}
+        {{ database_name }}
+
+# TODO mode parcial with bugs, after mysqldump command the latest is empty
+- name: Extend mysqldump command based on dump_type 
+  set_fact:
+    mysqldump_cmd: >-
+      {{ mysqldump_cmd_base }}
+      {% if dump_type == "partial" %}
+        {{ exclude_tables | map('format', '--ignore-table=' + database_name + '.{}') | join(' ') }}
+      {% endif %}
+
+- name: Mysqldump mode
+  debug: 
+    msg: "mysqldump mode: {{ dump_type }} - {{ mysqldump_cmd }}"
+
+- name: Run Docker container to execute mysqldump
+  community.docker.docker_container:
+    name: mysqldump-runner
+    image: mysql:8.0
+    networks:
+      - name: '{{ projet_client }}'
+    command: >-
+      bash -c '{{ mysqldump_cmd }} | gzip > /dump/latest.sql.gz'
+    volumes:
+      - /tmp/dump:/dump
+    #auto_remove: true
+    detach: false
+
+#- name: Upload dump to S3
+#  ansible.builtin.shell: >
+#    aws s3 cp {{ dump_file }} {{ s3_bucket }}
+#  environment:
+#    AWS_ACCESS_KEY_ID: "{{ lookup('env', 'AWS_ACCESS_KEY_ID') }}"
+#    AWS_SECRET_ACCESS_KEY: "{{ lookup('env', 'AWS_SECRET_ACCESS_KEY') }}"
+#    AWS_DEFAULT_REGION: us-east-1
+
+#- name: Cleanup dump
+#  file:
+#    path: "{{ dump_file }}"
+#    state: absent

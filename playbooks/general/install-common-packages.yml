@@ -5,6 +5,10 @@
       - wget
       - git
       - vim
+      - unzip
+      - jq
+      - python3-pip
+      - ansible
     state: present
 
 - name: Ensure crontab is installed

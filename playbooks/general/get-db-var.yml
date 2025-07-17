@@ -1,0 +1,25 @@
+- name: Read .env content from Amazon
+  slurp:
+    src: "/home/ec2-user/www/{{ projet_client }}/.env"
+  register: env_file
+  when: ansible_distribution == "Amazon"
+
+- name: Decode env content
+  set_fact:
+    env_content: "{{ env_file.content | b64decode }}"
+
+- name: Extract TM_DATABASE_NAME
+  set_fact:
+    database_name: "{{ (env_content | regex_findall('^TM_DATABASE_NAME=(.*)$', multiline=True)) | first | default('') }}"
+
+- name: Extract TM_DATABASE_USERNAME
+  set_fact:
+    database_username: "{{ (env_content | regex_findall('^TM_DATABASE_USERNAME=(.*)$', multiline=True)) | first | default('') }}"
+
+- name: Extract TM_DATABASE_PASSWORD
+  set_fact:
+    database_password: "{{ (env_content | regex_findall('^TM_DATABASE_PASSWORD=(.*)$', multiline=True)) | first | default('') }}"
+
+- name: Extract TM_DATABASE_WRITER_HOSTNAME
+  set_fact:
+    database_hostname: "{{ (env_content | regex_findall('^TM_DATABASE_WRITER_HOSTNAME=(.*)$', multiline=True)) | first | default('') }}"

@@ -1,0 +1,29 @@
+---
+- name: Run Database Export Playbook
+  hosts: all
+
+  pre_tasks:
+    - name: Ensure common packages are installed
+      import_tasks: general/install-common-packages.yml
+      become: true
+
+    - name: Install Amazon AWS Ansible Collection
+      import_tasks: aws/install-ansible-collection-amazon.yml
+
+    - name: Get var from SSM
+      import_tasks: aws/get-db-ssm.yml
+      become: true
+      when: env_type == "ecs"
+
+    - name: Get var from .env file
+      import_tasks: general/get-db-var.yml
+      become: true
+      when: env_type == "onpremise"
+
+  tasks:
+    - name: Ensure Docker is installed
+      import_tasks: general/install-docker.yml
+      become: true
+
+    - name: Export Database
+      import_tasks: general/run-export-db.yml
