@@ -18,20 +18,26 @@
         -u{{ database_username }} -p{{ database_password }} -h{{ database_hostname }}
         {{ database_name }}
 
-# TODO mode parcial with bugs, after mysqldump command the latest is empty
 - name: Extend mysqldump command based on dump_type 
   set_fact:
     mysqldump_cmd: >-
       {{ mysqldump_cmd_base }}
       {% if dump_type == "partial" %}
-        {{ exclude_tables | map('format', '--ignore-table=' + database_name + '.{}') | join(' ') }}
+        {% for tbl in exclude_tables %}--ignore-table={{ database_name }}.{{ tbl }} {% endfor %}
       {% endif %}
 
 - name: Mysqldump mode
   debug: 
     msg: "mysqldump mode: {{ dump_type }} - {{ mysqldump_cmd }}"
 
+- name: Ensure Docker network exists
+  become: true
+  community.docker.docker_network:
+    name: '{{ projet_client }}'
+    state: present
+
 - name: Run Docker container to execute mysqldump
+  become: true
   community.docker.docker_container:
     name: mysqldump-runner
     image: mysql:8.0
@@ -44,13 +50,11 @@
     #auto_remove: true
     detach: false
 
-#- name: Upload dump to S3
-#  ansible.builtin.shell: >
-#    aws s3 cp {{ dump_file }} {{ s3_bucket }}
-#  environment:
-#    AWS_ACCESS_KEY_ID: "{{ lookup('env', 'AWS_ACCESS_KEY_ID') }}"
-#    AWS_SECRET_ACCESS_KEY: "{{ lookup('env', 'AWS_SECRET_ACCESS_KEY') }}"
-#    AWS_DEFAULT_REGION: us-east-1
+- name: Copy dump from remote
+  ansible.builtin.fetch:
+    src: /tmp/dump/latest.sql.gz
+    dest: ../../dump/
+    flat: yes
 
 #- name: Cleanup dump
 #  file:

@@ -1,8 +1,8 @@
 - name: Read .env content from Amazon
   slurp:
-    src: "/home/ec2-user/www/{{ projet_client }}/.env"
+    src: "/home/{{ server_username }}/www/{{ projet_client }}/.env"
   register: env_file
-  when: ansible_distribution == "Amazon"
+#  when: ansible_distribution == "Amazon"
 
 - name: Decode env content
   set_fact:
