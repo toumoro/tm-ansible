@@ -14,6 +14,10 @@
   set_fact:
     solr_java_mem: "{{ lookup('amazon.aws.aws_ssm', ssm_prefix ~ '/SOLR_JAVA_MEM', region=region) }}"
 
+- name: Get TYPO3 Solr Enabled Cores from SSM
+  set_fact:
+    typo3_solr_enabled_cores: "{{ lookup('amazon.aws.aws_ssm', ssm_prefix ~ '/TYPO3_SOLR_ENABLED_CORES', region=region, on_missing='skip') | default('',true) }}"
+
 - name: Get AWS Account ID from SSM
   set_fact:
     aws_account_id: "{{ lookup('amazon.aws.aws_ssm', ssm_prefix ~ '/AWS_ACCOUNT', region=region) }}"

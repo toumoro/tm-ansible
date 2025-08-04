@@ -72,6 +72,7 @@
     env:
       SOLR_OPTS: "{{ solr_opts }}"
       SOLR_JAVA_MEM: "{{ solr_java_mem }}"
+      TYPO3_SOLR_ENABLED_CORES: "{{ typo3_solr_enabled_cores }}"
     state: started
     volumes:
       - "/mnt/data:/var/solr/data/data"
