@@ -37,7 +37,7 @@
     owner: 8983
     group: 8983
     recurse: yes
-    
+
 - name: Get EC2 instance metadata
   amazon.aws.ec2_metadata_facts:
   retries: 10
@@ -49,7 +49,7 @@
 
 - name: Login to Amazon ECR
   ansible.builtin.command: >
-    aws ecr get-login-password --region {{ aws_region }} 
+    aws ecr get-login-password --region {{ aws_region }}
   register: ecr_login
 
 - name: Login to ECR using Docker
