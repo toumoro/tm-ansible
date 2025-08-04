@@ -8,7 +8,7 @@
       - unzip
       - jq
       - python3-pip
-      - curl
+      #- curl
       #- ansible
     state: present
 
