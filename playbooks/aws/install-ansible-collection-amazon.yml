@@ -1,6 +1,7 @@
-- name: Ensure pip, boto3, and botocore are installed
+- name: Ensure pip, boto, boto3, and botocore are installed
   ansible.builtin.pip:
     name:
+      - boto
       - boto3
       - botocore
     state: present
