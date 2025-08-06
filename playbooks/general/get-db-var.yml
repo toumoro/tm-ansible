@@ -1,4 +1,4 @@
-- name: Read .env content from Amazon
+- name: Read .env content from Server
   slurp:
     src: "/home/{{ server_username }}/www/{{ projet_client }}/.env"
   register: env_file
