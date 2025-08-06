@@ -1,0 +1,95 @@
+---
+- name: Installer et valider les outils AWS
+  hosts: localhost
+  become: true
+  tasks:
+
+    ## 🔧 INSTALLATION
+
+    - name: Mettre à jour les paquets système
+      apt:
+        update_cache: true
+
+    - name: Installer pip3 (requis pour boto3/botocore)
+      apt:
+        name: python3-pip
+        state: present
+
+    - name: Installer boto3 et botocore via pip (méthode officielle)
+      pip:
+        name:
+          - boto3
+          - botocore
+        state: latest
+        executable: pip3
+
+    - name: Installer ou mettre à jour la collection amazon.aws
+      ansible.builtin.command:
+        cmd: ansible-galaxy collection install amazon.aws --upgrade
+
+    - name: Installer amazon-ssm-agent via apt
+      apt:
+        name: amazon-ssm-agent
+        state: present
+
+    - name: Activer et démarrer amazon-ssm-agent
+      ansible.builtin.systemd:
+        name: amazon-ssm-agent
+        enabled: true
+        state: started
+
+    - name: Télécharger le plugin Session Manager depuis AWS S3
+      get_url:
+        url: https://s3.amazonaws.com/session-manager-downloads/plugin/latest/ubuntu_64bit/session-manager-plugin.deb
+        dest: /tmp/session-manager-plugin.deb
+
+    - name: Installer le plugin Session Manager via dpkg
+      apt:
+        deb: /tmp/session-manager-plugin.deb
+
+    ## ✅ VALIDATION
+
+    - name: Vérifier la version de boto3
+      command: python3 -c "import boto3; print('boto3:', boto3.__version__)"
+      register: boto3_version
+      changed_when: false
+
+    - name: Afficher la version de boto3
+      debug:
+        msg: "{{ boto3_version.stdout }}"
+
+    - name: Vérifier la version de botocore
+      command: python3 -c "import botocore; print('botocore:', botocore.__version__)"
+      register: botocore_version
+      changed_when: false
+
+    - name: Afficher la version de botocore
+      debug:
+        msg: "{{ botocore_version.stdout }}"
+
+    - name: Vérifier la présence de la collection amazon.aws
+      command: ansible-galaxy collection list
+      register: collection_list
+      changed_when: false
+
+    - name: Afficher la version de la collection amazon.aws
+      debug:
+        msg: "{{ collection_list.stdout_lines | select('search', 'amazon.aws') | list }}"
+
+    - name: Vérifier le statut de l’agent SSM
+      command: systemctl is-active amazon-ssm-agent
+      register: ssm_status
+      changed_when: false
+
+    - name: Afficher le statut de l’agent SSM
+      debug:
+        msg: "amazon-ssm-agent est {{ ssm_status.stdout }}"
+
+    - name: Vérifier la version du plugin Session Manager
+      command: session-manager-plugin --version
+      register: plugin_version
+      changed_when: false
+
+    - name: Afficher la version du plugin Session Manager
+      debug:
+        msg: "{{ plugin_version.stdout }}"
