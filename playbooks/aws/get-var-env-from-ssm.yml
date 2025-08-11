@@ -16,7 +16,7 @@
 
 - name: Get TYPO3 Solr Enabled Cores from SSM
   set_fact:
-    typo3_solr_enabled_cores: "{{ lookup('amazon.aws.aws_ssm', ssm_prefix ~ '/TYPO3_SOLR_ENABLED_CORES', region=region, on_missing='skip') | default('',true) }}"
+    typo3_solr_enabled_cores: "{{ lookup('amazon.aws.aws_ssm', ssm_prefix ~ '/TYPO3_SOLR_ENABLED_CORES', region=region, on_missing='skip') | default('french english',true) }}"
 
 - name: Get AWS Account ID from SSM
   set_fact:
