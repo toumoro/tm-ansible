@@ -18,7 +18,7 @@
     - name: Get var from .env file
       import_tasks: general/get-db-var.yml
       become: true
-      when: env_type == "onpremise"
+      when: env_type == "onpremise" or env_type == "ec2"
 
   tasks:
     - name: Ensure Docker is installed

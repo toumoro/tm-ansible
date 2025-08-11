@@ -8,7 +8,7 @@
       - unzip
       - jq
       - python3-pip
-      - ansible
+      #- ansible
     state: present
 
 - name: Ensure crontab is installed
