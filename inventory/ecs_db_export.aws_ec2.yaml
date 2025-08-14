@@ -2,6 +2,7 @@ plugin: amazon.aws.aws_ec2
 regions:
   - ca-central-1
 filters:
+  tag:Name: BastionHost
   instance-state-name: running
 hostnames:
   - instance_id
