@@ -1,18 +1,18 @@
 plugin: amazon.aws.aws_ec2
 regions:
-  - "{{ lookup('env', 'AWS_REGION') }}"
+  - ca-central-1
 filters:
-  tag:Name: "{{ lookup('env', 'INSTANCE_NAME') }}"
+  tag:Name: BastionHost
   instance-state-name: running
 hostnames:
   - instance_id
 compose:
   ansible_connection: amazon.aws.aws_ssm
-  ansible_aws_ssm_region: "{{ lookup('env', 'AWS_REGION') }}"
-  ansible_aws_ssm_bucket_name: "{{ lookup('env', 'AWS_SSM_BUCKET') }}"
-  env_type: "{{ lookup('env', 'ENV_TYPE') }}"
-  region: "{{ lookup('env', 'AWS_REGION') }}"
-  dump_type: "{{ lookup('env', 'DUMP_TYPE') }}"
-  server_username: "{{ lookup('env', 'SERVER_USERNAME') }}"
-  projet_client: "{{ lookup('env', 'PROJET_CLIENT') }}"
+  ansible_aws_ssm_region: ca-central-1
+  ansible_aws_ssm_bucket_name: tm-ssm-transfer-bucket-chc
+  env_type: ecs
+  region: ca-central-1
+  dump_type: partial
+  server_username: ec2-user
+  projet_client: chc-site-web
   ansible_python_interpreter: /usr/bin/python3
