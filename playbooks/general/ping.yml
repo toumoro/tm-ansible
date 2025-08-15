@@ -1,0 +1,43 @@
+---
+- hosts: localhost
+  gather_facts: no
+  vars:
+    ssm_region: "{{ lookup('env','SSM_REGION') }}"
+    bucket_name: "{{ lookup('env','AWS_SSM_BUCKET') }}"
+    env_type: "{{ lookup('env','ENV_TYPE') }}"
+    dump_type: "{{ lookup('env','DUMP_TYPE') }}"
+    server_username: "{{ lookup('env','SERVER_USERNAME') }}"
+    projet_client: "{{ lookup('env','PROJET_CLIENT') }}"
+    instance_name: "{{ lookup('env','INSTANCE_NAME') }}"
+  tasks:
+    - name: Générer le fichier group_vars pour le groupe dynamique
+      template:
+        src: group_vars/ecs_db_export_template.yml.j2
+        dest: "group_vars/{{ instance_name }}.yml"
+
+
+
+
+- name: Test ping sur le groupe dynamique
+  hosts: "{{ instance_name }}"
+  gather_facts: no
+
+  # Valeurs injectées dans le template
+  vars:
+    ssm_region: "{{ lookup('env','SSM_REGION') }}"
+    bucket_name: "{{ lookup('env','AWS_SSM_BUCKET') }}"
+    env_type: "{{ lookup('env','ENV_TYPE') }}"
+    dump_type: "{{ lookup('env','DUMP_TYPE') }}"
+    server_username: "{{ lookup('env','SERVER_USERNAME') }}"
+    projet_client: "{{ lookup('env','PROJET_CLIENT') }}"
+
+  tasks:
+    - name: Afficher les variables
+      debug:
+        msg:
+          - "Bucket: {{ ansible_aws_ssm_bucket_name }}"
+          - "Projet: {{ projet_client }}"
+          - "Env: {{ env_type }}"
+
+    - name: Ping
+      ansible.builtin.ping:

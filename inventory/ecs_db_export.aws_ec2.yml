@@ -1,14 +1,23 @@
 plugin: amazon.aws.aws_ec2
 regions:
   - ca-central-1
+
+# Filtrage des instances EC2 par tag Name (depuis secret GitHub)
 filters:
   instance-state-name: running
-groups:
-  ecs_db_export_instance: "tags['Name'] == '{{ lookup('env', 'INSTANCE_NAME') }}'"
+  tag:Name: "{{ INSTANCE_NAME }}"
+
+# Le hostname sera le tag Name
 hostnames:
-  - instance_id
+  - tags.Name
+
+# L'adresse réelle pour se connecter via SSM
 compose:
   ansible_host: instance_id
+
+# Création d'un groupe dynamique basé sur le tag Name
+groups:
+  "{{ INSTANCE_NAME }}": all
 
 
 
