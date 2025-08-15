@@ -1,0 +1,25 @@
+---
+- name: Test ping sur le groupe dynamique
+  hosts: all
+  gather_facts: no
+
+  # Valeurs injectées dans le template
+  vars:
+    ssm_region: "{{ lookup('env','SSM_REGION') }}"
+    bucket_name: "{{ lookup('env','AWS_SSM_BUCKET') }}"
+    dump_type: "{{ lookup('env','DUMP_TYPE') }}"
+    server_username: "{{ lookup('env','SERVER_USERNAME') }}"
+    projet_client: "{{ lookup('env','PROJET_CLIENT') }}"
+    ansible_aws_ssm_bucket_name: "{{ lookup('env','AWS_SSM_BUCKET') }}"
+
+  tasks:
+
+    # - name: Afficher les variables
+    #   debug:
+    #     msg:
+    #       - "Bucket: {{ ansible_aws_ssm_bucket_name }}"
+    #       - "Projet: {{ projet_client }}"
+    #       - "Env: {{ env_type }}"
+
+    - name: Ping
+      ansible.builtin.ping:
