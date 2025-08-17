@@ -2,5 +2,3 @@ ansible_connection: amazon.aws.aws_ssm
 ansible_aws_ssm_s3_addressing_style: virtual
 ansible_python_interpreter: /usr/bin/python3
 env_type: ecs
-
-

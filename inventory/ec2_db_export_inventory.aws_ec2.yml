@@ -1,0 +1,12 @@
+plugin: amazon.aws.aws_ec2
+regions:
+  - "{{ lookup('env', 'AWS_REGION') }}"
+filters:
+  instance-state-name: running 
+  tag:Name: "{{ lookup('env', 'INSTANCE_NAME') }}"
+hostnames:
+  - instance_id
+compose:
+  ansible_host: instance_id
+groups:
+  ec2_db_export_instance: true
