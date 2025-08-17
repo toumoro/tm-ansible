@@ -1,0 +1,20 @@
+---
+- name: Prepare runner
+  hosts: localhost
+  tasks:
+    - name: Install requirements
+      import_tasks: aws/install-ansible-requirements-amazon.yml
+      become: true
+
+    - name: Update Amazon collection
+      import_tasks: aws/install-ansible-collection-amazon.yml
+      become: true
+
+    - name: Install SSM Agent
+      import_tasks: aws/install-ssm-agent.yml
+      become: true
+
+    - name: Install Session Manager Plugin
+      import_tasks: aws/install-session-manager-plugin.yml
+      become: true
+
