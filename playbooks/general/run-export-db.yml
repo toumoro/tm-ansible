@@ -6,9 +6,10 @@
       - sys_file_storage
       - sys_history
 
-- name: Debug
-  debug:
-    msg: "-u{{ database_username }} -p{{ database_password }} -h{{ database_hostname }} {{ database_name }}"
+# NE PAS AFFICHER LA COMMANDE EN PRODUCTION
+# - name: Debug
+#   debug:
+#     msg: "-u{{ database_username }} -p{{ database_password }} -h{{ database_hostname }} {{ database_name }}"
 
 - name: Build mysqldump command
   set_fact:
@@ -26,9 +27,10 @@
         {% for tbl in exclude_tables %}--ignore-table={{ database_name }}.{{ tbl }} {% endfor %}
       {% endif %}
 
-- name: Mysqldump mode
-  debug: 
-    msg: "mysqldump mode: {{ dump_type }} - {{ mysqldump_cmd }}"
+# NE PAS AFFICHER LA COMMANDE EN PRODUCTION
+# - name: Mysqldump mode
+#   debug: 
+#     msg: "mysqldump mode: {{ dump_type }} - {{ mysqldump_cmd }}"
 
 - name: Ensure Docker network exists
   become: true
