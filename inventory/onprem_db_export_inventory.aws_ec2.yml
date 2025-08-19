@@ -2,9 +2,8 @@ plugin: amazon.aws.aws_ec2
 regions:
   - "{{ lookup('env', 'AWS_REGION') }}"
 filters:
-  PingStatus: Online
-  #instance-state-name: running 
-  #tag:Name: "{{ lookup('env', 'DUMP_INSTANCE_NAME') }}"
+  instance-state-name: running 
+  tag:Name: "{{ lookup('env', 'DUMP_INSTANCE_NAME') }}"
 hostnames:
   - instance_id
 compose:

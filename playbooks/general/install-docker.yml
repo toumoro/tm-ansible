@@ -81,7 +81,9 @@
     mode: '0755'
 
 - name: Verify Docker Compose installation
-  command: docker-compose --version
+  command: docker-compose --version       # Commande introuvble sans l'ajout du chemin dans le PATH de Ansible
+  environment:
+    PATH: "{{ ansible_env.PATH }}:/usr/local/bin"
   register: docker_compose_version
 
 - name: Show Docker Compose version
