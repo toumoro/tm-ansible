@@ -2,7 +2,6 @@
 - name: Run Database Export Playbook
   hosts: all
   vars:
-
     region: "{{ lookup('env','AWS_REGION') }}"
     bucket_name: "{{ lookup('env','AWS_SSM_BUCKET') }}"
     dump_type: "{{ lookup('env','DUMP_TYPE') }}"
@@ -12,13 +11,6 @@
     ansible_aws_ssm_region: "{{ lookup('env','AWS_REGION') }}"
 
   pre_tasks:
-    - name: Ensure common packages are installed
-      import_tasks: general/install-common-packages.yml
-      become: true
-
-    - name: Install Amazon AWS Ansible Collection
-      import_tasks: aws/install-ansible-collection-amazon.yml
-
     - name: Get var from SSM
       import_tasks: aws/get-db-ssm.yml
       become: true
@@ -29,10 +21,10 @@
       become: true
       when: env_type == "onpremise" or env_type == "ec2"
 
-  tasks:
     - name: Ensure Docker is installed
       import_tasks: general/install-docker.yml
       become: true
 
+  tasks:
     - name: Export Database
       import_tasks: general/run-export-db.yml
