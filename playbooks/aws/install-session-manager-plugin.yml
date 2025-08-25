@@ -1,0 +1,40 @@
+
+- name: Télécharger le plugin session-manager (Debian/Ubuntu)
+  when: ansible_facts['os_family'] == 'Debian'
+  get_url:
+    url: >-
+      {{ 'https://s3.amazonaws.com/session-manager-downloads/plugin/latest/ubuntu_64bit/session-manager-plugin.deb'
+          if ansible_architecture == 'x86_64'
+          else 'https://s3.amazonaws.com/session-manager-downloads/plugin/latest/ubuntu_arm64/session-manager-plugin.deb' }}
+    dest: /tmp/session-manager-plugin.deb
+    force: no
+
+- name: Installer le plugin session-manager (Debian/Ubuntu)
+  when: ansible_facts['os_family'] == 'Debian'
+  apt:
+    deb: /tmp/session-manager-plugin.deb
+
+- name: Télécharger le plugin session-manager (RHEL/CentOS/Amazon Linux)
+  when: ansible_facts['os_family'] == 'RedHat'
+  get_url:
+    url: >-
+      {{ 'https://s3.amazonaws.com/session-manager-downloads/plugin/latest/linux_64bit/session-manager-plugin.rpm'
+          if ansible_architecture == 'x86_64'
+          else 'https://s3.amazonaws.com/session-manager-downloads/plugin/latest/linux_arm64/session-manager-plugin.rpm' }}
+    dest: /tmp/session-manager-plugin.rpm
+  args:
+    creates: /tmp/session-manager-plugin.rpm
+
+- name: Installer le plugin session-manager (RHEL/CentOS/Amazon Linux)
+  when: ansible_facts['os_family'] == 'RedHat'
+  yum:
+    name: /tmp/session-manager-plugin.rpm
+    state: present
+
+- name: Vérifier la version du plugin session-manager
+  command: session-manager-plugin --version
+  register: smp_version
+  ignore_errors: yes
+
+- debug:
+    msg: "Version du session-manager-plugin : {{ smp_version.stdout }}"

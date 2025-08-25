@@ -1,16 +1,9 @@
-- name: Ensure pip, boto3, and botocore are installed
-  ansible.builtin.pip:
-    name:
-      - boto3
-      - botocore
-    state: present
-
 - name: Install amazon.aws collection
   ansible.builtin.command: ansible-galaxy collection install amazon.aws
   register: galaxy_install
   changed_when: "'was installed successfully' in galaxy_install.stdout"
 
 - name: Install community.aws collection
-  ansible.builtin.command: ansible-galaxy collection install community.aws
+  ansible.builtin.command: ansible-galaxy collection install community.aws --upgrade
   register: galaxy_install
   changed_when: "'was installed successfully' in galaxy_install.stdout"
