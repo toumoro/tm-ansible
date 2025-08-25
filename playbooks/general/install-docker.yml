@@ -11,6 +11,10 @@
   import_tasks: docker/install-docker-amazon.yml
   when: ansible_distribution == "Amazon"
 
+# - name: Install Docker on SLES 15 SP5
+#   import_tasks: docker/install-docker-suse.yml
+#   when: ansible_distribution == "SLES" and ansible_distribution_version is version('15.5', '>=')
+
 - name: Configure Crontab Docker
   import_tasks: docker/crontab.yml
 

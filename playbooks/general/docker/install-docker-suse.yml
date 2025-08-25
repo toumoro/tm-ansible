@@ -1,0 +1,19 @@
+    - name: Add Docker repository (SLES 15)
+      ansible.builtin.command:
+        cmd: >
+          zypper ar -f
+          https://download.docker.com/linux/sles/15/x86_64/stable
+          docker-ce-stable
+      args:
+        creates: /etc/zypp/repos.d/docker-ce-stable.repo
+
+    - name: Refresh zypper repositories
+      ansible.builtin.command: zypper --gpg-auto-import-keys ref
+
+    - name: Install Docker engine
+      ansible.builtin.zypper:
+        name:
+          - docker-ce
+          - docker-ce-cli
+          - containerd.io
+        state: present
