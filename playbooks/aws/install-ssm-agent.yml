@@ -1,0 +1,132 @@
+- name: Installer sur Ubuntu (via snap ou apt selon version)
+  block:
+    - name: Ubuntu moderne — installer via snap
+      snap:
+        name: amazon-ssm-agent
+        classic: yes
+        state: present
+      when: ansible_distribution == "Ubuntu" and ansible_distribution_version is version('16.04', '>=')
+
+    - name: Ubuntu ancien — telecherger le paquet .deb
+      get_url:
+        url: https://s3.amazonaws.com/session-manager-downloads/plugin/latest/ubuntu_64bit/session-manager-plugin.deb
+        dest: /tmp/amazon-ssm-agent.deb
+      when: ansible_distribution == "Ubuntu" and ansible_distribution_version is version('16.04', '<')
+
+    - name: Ubuntu ancien — installer .deb
+      apt:
+        deb: /tmp/amazon-ssm-agent.deb
+      when: ansible_distribution == "Ubuntu" and ansible_distribution_version is version('16.04', '<')
+
+    - name: Démarrer et activer amazon-ssm-agent sur Ubuntu
+      service:
+        name: amazon-ssm-agent
+        state: started
+        enabled: yes
+      when: ansible_distribution == "Ubuntu"
+
+  rescue:
+    - name: Échec sur Ubuntu (afficher debug)
+      debug:
+        msg: "Échec de l'installation SSM sur Ubuntu"
+
+- name: Installer sur Amazon Linux 2 / 2023 (via RPM)
+  block:
+    - name: Installer via yum le RPM depuis S3
+      yum:
+        name: "https://s3.amazonaws.com/ec2-downloads-windows/SSMAgent/latest/linux_amd64/amazon-ssm-agent.rpm"
+        state: present
+      when: ansible_distribution == "Amazon" and (ansible_distribution_major_version | int) >= 2
+
+    - name: Activer et démarrer amazon-ssm-agent
+      service:
+        name: amazon-ssm-agent
+        state: started
+        enabled: yes
+      when: ansible_distribution == "Amazon"
+
+  rescue:
+    - name: Échec sur Amazon Linux (afficher debug)
+      debug:
+        msg: "Échec de l'installation SSM sur Amazon Linux"
+
+- name: Installer sur Debian (via paquet .deb)
+  block:
+    - name: Créer un répertoire temporaire
+      file:
+        path: /tmp/ssm
+        state: directory
+        mode: '0755'
+
+    - name: Télécharger le paquet SSM Agent pour Debian x86_64
+      get_url:
+        url: https://s3.amazonaws.com/ec2-downloads-windows/SSMAgent/latest/debian_amd64/amazon-ssm-agent.deb
+        dest: /tmp/ssm/amazon-ssm-agent.deb
+      when: ansible_architecture == "x86_64"
+
+    - name: Télécharger le paquet SSM Agent pour Debian ARM64
+      get_url:
+        url: https://s3.amazonaws.com/ec2-downloads-windows/SSMAgent/latest/debian_arm64/amazon-ssm-agent.deb
+        dest: /tmp/ssm/amazon-ssm-agent.deb
+      when: ansible_architecture == "aarch64"
+
+    - name: Installer le paquet amazon-ssm-agent
+      ansible.builtin.apt:
+        deb: /tmp/ssm/amazon-ssm-agent.deb
+        state: present
+      register: ssm_install_result
+
+    - name: Vérifier si systemd est disponible
+      ansible.builtin.stat:
+        path: /bin/systemctl
+      register: systemd_check
+      ignore_errors: yes
+
+    - name: Démarrer amazon-ssm-agent si systemd présent
+      ansible.builtin.systemd:
+        name: amazon-ssm-agent
+        state: started
+        enabled: yes
+      when: systemd_check.stat.exists
+
+    - name: Lancer amazon-ssm-agent directement si pas de systemd
+      ansible.builtin.shell: "sudo /usr/bin/amazon-ssm-agent &"
+      when: not systemd_check.stat.exists
+
+    - name: Vérifier si amazon-ssm-agent tourne avec systemd
+      ansible.builtin.shell: systemctl is-active amazon-ssm-agent
+      register: ssm_status
+      failed_when: false
+      changed_when: false
+      when: systemd_check.stat.exists
+  
+    - name: Vérifier si amazon-ssm-agent tourne sans systemd
+      ansible.builtin.shell: pgrep -fl amazon-ssm-agent
+      register: ssm_status
+      failed_when: false
+      changed_when: false
+      when: not systemd_check.stat.exists
+
+    - name: Afficher le statut de l'agent SSM
+      ansible.builtin.debug:
+        msg: "amazon-ssm-agent status: {{ ssm_status.stdout_lines }}"
+
+    - name: Debug systemd
+      ansible.builtin.debug:
+        msg: "systemd présent ? {{ systemd_check.stat.exists }}"
+
+    # - name: Lancer amazon-ssm-agent directement si pas de systemd
+    #   shell: nohup /usr/bin/amazon-ssm-agent > /var/log/amazon-ssm-agent.log 2>&1 &
+    #   when:
+    #     - "'systemd' not in ansible_facts['pkg_mgr'] and ansible_service_mgr != 'systemd'"
+    #     - ssm_install_result is succeeded
+
+  rescue:
+    - name: Échec sur Debian (afficher debug)
+      debug:
+        msg: "Échec de l'installation SSM sur Debian"
+
+- name: Avertissement pour OS non pris en charge
+  debug:
+    msg: "Installation SSM non gérée sur {{ ansible_distribution }} {{ ansible_distribution_version }}"
+  when: ansible_distribution not in ["Ubuntu", "Amazon", "Debian"]

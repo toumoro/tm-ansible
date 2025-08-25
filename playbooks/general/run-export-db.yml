@@ -1,0 +1,64 @@
+- name: List of tables to exclude from mysqldump
+  set_fact:
+    exclude_tables:
+      - be_users
+      - sys_domain
+      - sys_file_storage
+      - sys_history
+
+# NE PAS AFFICHER LA COMMANDE EN PRODUCTION
+# - name: Debug
+#   debug:
+#     msg: "-u{{ database_username }} -p{{ database_password }} -h{{ database_hostname }} {{ database_name }}"
+
+- name: Build mysqldump command
+  set_fact:
+    mysqldump_cmd_base: >-
+        mysqldump --default-character-set=utf8mb4 --set-gtid-purged=OFF
+        --quick --single-transaction --no-tablespaces 
+        -u{{ database_username }} -p{{ database_password }} -h{{ database_hostname }}
+        {{ database_name }}
+
+- name: Extend mysqldump command based on dump_type 
+  set_fact:
+    mysqldump_cmd: >-
+      {{ mysqldump_cmd_base }}
+      {% if dump_type == "partial" %}
+        {% for tbl in exclude_tables %}--ignore-table={{ database_name }}.{{ tbl }} {% endfor %}
+      {% endif %}
+
+# NE PAS AFFICHER LA COMMANDE EN PRODUCTION
+# - name: Mysqldump mode
+#   debug: 
+#     msg: "mysqldump mode: {{ dump_type }} - {{ mysqldump_cmd }}"
+
+- name: Ensure Docker network exists
+  become: true
+  community.docker.docker_network:
+    name: '{{ projet_client }}'
+    state: present
+
+- name: Run Docker container to execute mysqldump
+  become: true
+  community.docker.docker_container:
+    name: mysqldump-runner
+    image: mysql:8.0
+    networks:
+      - name: '{{ projet_client }}'
+    command: >-
+      bash -c '{{ mysqldump_cmd }} | gzip > /dump/latest.sql.gz'
+    volumes:
+      - /tmp/dump:/dump
+    #auto_remove: true
+    detach: false
+
+- name: Copy dump from remote
+  ansible.builtin.fetch:
+    src: /tmp/dump/latest.sql.gz
+    dest: ../../dump/
+    flat: yes
+
+#- name: Cleanup dump
+#  file:
+#    path: "{{ dump_file }}"
+#    state: absent

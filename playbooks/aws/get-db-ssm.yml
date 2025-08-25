@@ -1,0 +1,15 @@
+- name: Get Database Name from SSM
+  set_fact:
+    database_name: "{{ lookup('amazon.aws.aws_ssm', '/applications/tm/secrets/TM_DATABASE_NAME', region=region) }}"
+
+- name: Get Database Password from SSM
+  set_fact:
+    database_password: "{{ lookup('amazon.aws.aws_ssm', '/applications/tm/secrets/TM_DATABASE_PASSWORD', region=region) }}"
+
+- name: Get Database Username from SSM
+  set_fact:
+    database_username: "{{ lookup('amazon.aws.aws_ssm', '/applications/tm/secrets/TM_DATABASE_USERNAME', region=region) }}"
+
+- name: Get Database Endpoint from SSM
+  set_fact:
+    database_hostname: "{{ lookup('amazon.aws.aws_ssm', '/RDS/Endpoint/Write', region=region) }}"
