@@ -16,7 +16,7 @@
     mysqldump_cmd_base: >-
         mysqldump --default-character-set=utf8mb4 --set-gtid-purged=OFF
         --quick --single-transaction --no-tablespaces 
-        -u{{ database_username }} -p{{ database_password }} -h{{ database_hostname }}
+        -u{{ database_username }} -p'{{ database_password }}' -h{{ database_hostname }}
         {{ database_name }}
 
 - name: Extend mysqldump command based on dump_type 
