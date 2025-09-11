@@ -60,7 +60,7 @@
   delay: 5
   until: dump_check.rc != 0
   failed_when: dump_check.rc != 1
-
+  
 - name: Copy dump from remote
   ansible.builtin.fetch:
     src: /tmp/dump/latest.sql.gz
