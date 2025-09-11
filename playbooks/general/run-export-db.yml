@@ -52,6 +52,14 @@
     #auto_remove: true
     detach: false
 
+- name: Attendre que le fichier dump soit prêt et intègre
+  ansible.builtin.command:
+    cmd: pgrep -f mysqldump
+  register: dump_check
+  retries: 60
+  delay: 5
+  until: dump_check.rc != 0
+
 - name: Copy dump from remote
   ansible.builtin.fetch:
     src: /tmp/dump/latest.sql.gz
