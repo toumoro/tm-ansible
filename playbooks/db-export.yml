@@ -21,6 +21,10 @@
       become: true
       when: env_type == "onpremise" or env_type == "ec2"
 
+    - name: Ensure Common packages are installed
+      import_tasks: general/install-common-packages.yml
+      become: true
+
     - name: Ensure Docker is installed
       import_tasks: general/install-docker.yml
       become: true
