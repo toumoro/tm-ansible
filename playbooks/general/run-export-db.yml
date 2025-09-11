@@ -52,11 +52,11 @@
     #auto_remove: true
     detach: false
 
-- name: Copy dump from remote
-  ansible.builtin.fetch:
+- name: Copy dump from remote server
+  ansible.posix.synchronize:
     src: /tmp/dump/latest.sql.gz
     dest: ../../dump/
-    flat: yes
+    mode: pull
 
 #- name: Cleanup dump
 #  file:
