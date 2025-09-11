@@ -53,26 +53,18 @@
     detach: false
 
 - name: Attendre que le fichier dump soit prêt et intègre
-  ansible.builtin.shell: |
-    for i in {1..36}; do
-      if gzip -t /tmp/dump/latest.sql.gz 2>/dev/null; then
-        echo "OK"
-        exit 0
-      fi
-      echo "Fichier non prêt, attente..."
-      sleep 5
-    done
-    echo "Fichier toujours corrompu après 3 minutes"
-    exit 1
-  register: gzip_check
-  failed_when: "'OK' not in gzip_check.stdout"
+  ansible.builtin.command:
+    cmd: pgrep -f mysqldump
+  register: dump_check
+  retries: 60
+  delay: 5
+  until: dump_check.rc != 0
 
 - name: Copy dump from remote
   ansible.builtin.fetch:
     src: /tmp/dump/latest.sql.gz
     dest: ../../dump/
     flat: yes
-  when: "'OK' in gzip_check.stdout"
 
 #- name: Cleanup dump
 #  file:
