@@ -11,15 +11,34 @@
       #- ansible
     state: present
 
-- name: Ensure crontab is installed
-  package:
+- name: Ensure cron is Installed on RedHat/Amazon Linux
+  ansible.builtin.package:
     name: cronie
     state: present
-  when: ansible_distribution == "Amazon"
+  when: ansible_os_family in ["RedHat", "Amazon"]
 
-- name: Start and enable Crond service
-  systemd:
-    name: crond.service
-    enabled: yes
+- name: Ensure cron is Installed on Debian/Ubuntu
+  ansible.builtin.package:
+    name: cron
+    state: present
+  when: ansible_os_family == "Debian"
+
+- name: Ensure cron is Installed on SUSE
+  ansible.builtin.package:
+    name: cron
+    state: present
+  when: ansible_os_family == "Suse"
+
+- name: Ensure cron service is enabled and running (RedHat/Amazon/SUSE)
+  ansible.builtin.service:
+    name: crond
     state: started
-  when: ansible_distribution == "Amazon"
+    enabled: true
+  when: ansible_os_family in ["RedHat", "Amazon", "Suse"]
+
+- name: Ensure cron service is enabled and running (Debian/Ubuntu)
+  ansible.builtin.service:
+    name: cron
+    state: started
+    enabled: true
+  when: ansible_os_family == "Debian"
