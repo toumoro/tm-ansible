@@ -8,7 +8,6 @@
       - unzip
       - jq
       - python3-pip
-      #- ansible
     state: present
 
 - name: Ensure cron is Installed on RedHat/Amazon Linux
