@@ -8,8 +8,21 @@
       - unzip
       - jq
       - python3-pip
-      #- ansible
     state: present
+  when: ansible_os_family in ["RedHat", "Amazon", "Debian"]
+
+- name: Ensure packages are installed on SUSE
+  zypper:
+    name:
+      - htop
+      - wget
+      - git
+      - vim
+      - unzip
+      - jq
+      - python3-pip
+    state: present
+  when: ansible_os_family == "Suse"
 
 - name: Ensure cron is Installed on RedHat/Amazon Linux
   ansible.builtin.package:
