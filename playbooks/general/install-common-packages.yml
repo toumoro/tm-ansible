@@ -1,5 +1,5 @@
 - name: Ensure packages are installed
-  package:
+  ansible.builtin.package:
     name:
       - htop
       - wget
