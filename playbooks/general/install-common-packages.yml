@@ -9,6 +9,7 @@
       - jq
       - python3-pip
     state: present
+  when: ansible_os_family in ["RedHat", "Amazon", "Debian"]
 
 - name: Ensure cron is Installed on RedHat/Amazon Linux
   ansible.builtin.package:
