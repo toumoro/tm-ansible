@@ -1,0 +1,5 @@
+legacy_os:
+- { name: "RedHat", major: "8" }
+- { name: "CentOS", major: "8" }
+- { name: "AlmaLinux", major: "8" }
+- { name: "Ubuntu", major: "18" }

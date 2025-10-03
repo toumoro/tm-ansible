@@ -9,24 +9,36 @@
       - jq
       - python3-pip
     state: present
+  when: not is_legacy_os
+
+- name: Ensure common packages are installed (generic)
+  ansible.builtin.command: >
+    sh -c "if command -v apt-get >/dev/null 2>&1; then
+      apt-get update -y && apt-get install -y htop wget git vim unzip jq python3-pip;
+    elif command -v yum >/dev/null 2>&1; then
+      yum install -y htop wget git vim unzip jq python3-pip;
+    elif command -v zypper >/dev/null 2>&1; then
+      zypper install -y htop wget git vim unzip jq python3-pip;
+    fi"
+  when: is_legacy_os
 
 - name: Ensure cron is Installed on RedHat/Amazon Linux
   ansible.builtin.package:
     name: cronie
     state: present
-  when: ansible_os_family in ["RedHat", "Amazon"]
+  when: ansible_os_family in ["RedHat", "Amazon"] and not is_legacy_os
 
 - name: Ensure cron is Installed on Debian/Ubuntu
   ansible.builtin.package:
     name: cron
     state: present
-  when: ansible_os_family == "Debian"
+  when: ansible_os_family == "Debian" and not is_legacy_os
 
 - name: Ensure cron is Installed on SUSE
   ansible.builtin.package:
     name: cron
     state: present
-  when: ansible_os_family == "Suse"
+  when: ansible_os_family == "Suse" and not is_legacy_os
 
 - name: Ensure cron service is enabled and running (RedHat/Amazon/SUSE)
   ansible.builtin.service:
