@@ -1,0 +1,16 @@
+- name: Install dnf plugins core (RHEL/AlmaLinux 8)
+  ansible.builtin.command: dnf install -y dnf-plugins-core
+
+- name: Add Docker repo (RHEL/AlmaLinux 8)
+  ansible.builtin.command: dnf config-manager --add-repo https://download.docker.com/linux/rhel/docker-ce.repo
+  args:
+    creates: /etc/yum.repos.d/docker-ce.repo
+
+- name: Install Docker packages (RHEL/AlmaLinux 8)
+  ansible.builtin.command: >
+    dnf install -y
+    docker-ce
+    docker-ce-cli
+    containerd.io
+    docker-buildx-plugin
+    docker-compose-plugin
