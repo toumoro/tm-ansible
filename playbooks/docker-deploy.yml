@@ -6,7 +6,7 @@
     - name: Check proxy configuration
       import_tasks: general/configuration-proxy.yml
       become: true
-      when: proxy_address is defined and proxy_address | length > 0
+      when: proxy_address is defined and proxy_address != ""
 
     - name: Check if SWAP is configured
       import_tasks: general/configuration-swap.yml
