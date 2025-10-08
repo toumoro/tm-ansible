@@ -1,23 +1,12 @@
 ---
 - name: Deploy Docker Playbook
   hosts: all
-  vars_files:
-    - vars/legacy_os.yml
 
   pre_tasks:
-    - name: Determine if host matches legacy OS
-      set_fact:
-        is_legacy_os: >-
-          {{ legacy_os 
-            | selectattr('name', 'equalto', ansible_distribution)
-            | selectattr('major', 'equalto', ansible_distribution_major_version)
-            | list | length > 0
-          }}
-
     - name: Check proxy configuration
       import_tasks: general/configuration-proxy.yml
       become: true
-      when: proxy_address is defined and proxy_address | length > 0
+      when: proxy_address is defined and proxy_address != ""
 
     - name: Check if SWAP is configured
       import_tasks: general/configuration-swap.yml
