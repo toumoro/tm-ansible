@@ -1,0 +1,11 @@
+plugin: amazon.aws.aws_ec2
+regions:
+  - "{{ lookup('env', 'AWS_REGION') }}"
+filters:
+  instance-state-name: running
+  instance-id: "{{ lookup('env', 'TM_INSTANCE_ID') }}"
+hostnames:
+  - instance-id
+compose:
+  ansible_host: instance_id
+
