@@ -1,0 +1,116 @@
+---
+- name: Simple TYPO3 Container Deployment
+  hosts: all
+
+  vars:
+    server_username: "{{ lookup('env','SERVER_USERNAME') }}"
+    projet_client: "{{ lookup('env','PROJECT_CLIENT') }}"
+    typo3_container: web
+    typo3_user: www-data
+    typo3_workdir: /var/www
+
+  tasks:
+    # -------------------------------------------------------------------------
+    # Step 0: Define project root path
+    # -------------------------------------------------------------------------
+    - name: Set project root path
+      ansible.builtin.set_fact:
+        project_root: "/home/{{ server_username }}/www/{{ projet_client }}/"
+    # -------------------------------------------------------------------------
+    # Step 1: Move to project root
+    # -------------------------------------------------------------------------
+    - name: Ensure project root exists
+      ansible.builtin.file:
+        path: "{{ project_root }}"
+        state: directory
+
+    # -------------------------------------------------------------------------
+    # Step 2: Update repository
+    # -------------------------------------------------------------------------
+    - name: Mark directory as safe for git
+      ansible.builtin.command:
+        cmd: git config --global --add safe.directory {{ project_root }}
+    - name: Mark directory as safe for git
+      ansible.builtin.command:
+        cmd: git config --global --add safe.directory {{ typo3_workdir }}
+
+
+    - name: Reset local changes
+      ansible.builtin.command:
+        cmd: git checkout .
+        chdir: "{{ project_root }}"
+
+    - name: Pull latest code
+      ansible.builtin.git:
+        repo: .
+        dest: "{{ project_root }}"
+        update: yes
+        force: yes
+
+    # -------------------------------------------------------------------------
+    # Step 3: Pull Docker images
+    # -------------------------------------------------------------------------
+    - name: Pull Docker images
+      community.docker.docker_compose_v2:
+        project_src: "{{ project_root }}"
+        pull: always
+
+    # -------------------------------------------------------------------------
+    # Step 4: Build containers (no cache)
+    # -------------------------------------------------------------------------
+    - name: Build Docker containers
+      community.docker.docker_compose_v2:
+        project_src: "{{ project_root }}"
+        build: always
+
+    # -------------------------------------------------------------------------
+    # Step 5: Start containers
+    # -------------------------------------------------------------------------
+    - name: Start Docker containers
+      community.docker.docker_compose_v2:
+        project_src: "{{ project_root }}"
+        state: present
+
+    # -------------------------------------------------------------------------
+    # Step 6: Wait for services
+    # -------------------------------------------------------------------------
+    - name: Wait for containers to be ready
+      ansible.builtin.pause:
+        seconds: 10
+
+    # -------------------------------------------------------------------------
+    # Step 7: TYPO3 maintenance commands
+    # -------------------------------------------------------------------------
+    - name: Composer install
+      ansible.builtin.command: >
+        docker compose exec -T
+        -u www-data
+        -w /var/www
+        web composer install
+      args:
+        chdir: /var/www
+    
+    - name: TYPO3 database schema update
+      ansible.builtin.command: >
+        docker compose exec -T
+        -u www-data
+        -w /var/www
+        web ./vendor/bin/typo3 database:updateschema
+      args:
+        chdir: /var/www
+    
+    - name: TYPO3 cache flush
+      ansible.builtin.command: >
+        docker compose exec -T
+        -u www-data
+        -w /var/www
+        web ./vendor/bin/typo3 cache:flush
+      args:
+        chdir: /var/www
+    
+    # -------------------------------------------------------------------------
+    # Step 8: Deployment complete
+    # -------------------------------------------------------------------------
+    - name: Deployment completed
+      ansible.builtin.debug:
+        msg: "Simple TYPO3 Container deployment completed successfully"
