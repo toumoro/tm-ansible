@@ -22,7 +22,7 @@
     - name: Ensure project root exists
       ansible.builtin.file:
         path: "{{ project_root }}"
-        recurse: true
+        #recurse: true
         state: directory
 
     # -------------------------------------------------------------------------
