@@ -4,7 +4,7 @@
 
   vars:
     server_username: "{{ lookup('env','SERVER_USERNAME') }}"
-    projet_client: "{{ lookup('env','PROJECT_CLIENT') }}"
+    project_client: "{{ lookup('env','PROJECT_CLIENT') }}"
     typo3_container: web
     typo3_user: www-data
     typo3_workdir: /var/www
