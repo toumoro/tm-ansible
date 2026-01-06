@@ -15,7 +15,7 @@
     # -------------------------------------------------------------------------
     - name: Set project root path
       ansible.builtin.set_fact:
-        project_root: "/home/{{ server_username }}/www/{{ projet_client }}/"
+        project_root: "/home/{{ server_username }}/www/{{ project_client }}/"
     # -------------------------------------------------------------------------
     # Step 1: Move to project root
     # -------------------------------------------------------------------------
