@@ -89,7 +89,7 @@
         -w /var/www
         web composer install
       args:
-        chdir: /var/www
+        chdir: "{{ project_root }}"
     
     - name: TYPO3 database schema update
       ansible.builtin.command: >
@@ -98,7 +98,7 @@
         -w /var/www
         web ./vendor/bin/typo3 database:updateschema
       args:
-        chdir: /var/www
+        chdir: "{{ project_root }}"
     
     - name: TYPO3 cache flush
       ansible.builtin.command: >
@@ -107,7 +107,7 @@
         -w /var/www
         web ./vendor/bin/typo3 cache:flush
       args:
-        chdir: /var/www
+        chdir: "{{ project_root }}"
     
     # -------------------------------------------------------------------------
     # Step 8: Deployment complete
