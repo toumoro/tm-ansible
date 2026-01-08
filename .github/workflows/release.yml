@@ -1,26 +1,26 @@
 name: Release
 on:
-    push:
-        branches:
-            - master # or main
-
+  push:
+    branches:
+      - main
+      
 permissions:
-    contents: read # for checkout
+  contents: read # for checkout
 
 jobs:
-    release:
-        name: Release
-        runs-on: ubuntu-latest
-        permissions:
-            contents: write # to be able to publish a GitHub release
-            issues: write # to be able to comment on released issues
-            pull-requests: write # to be able to comment on released pull requests
-            id-token: write # to enable use of OIDC for trusted publishing and npm provenance
+  release:
+    name: Release
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write # to be able to publish a GitHub release
+      issues: write # to be able to comment on released issues
+      pull-requests: write # to be able to comment on released pull requests
+      id-token: write # to enable use of OIDC for trusted publishing and npm provenance
     steps:
-        - name: Checkout
-            uses: actions/checkout@v4
-            with:
-                fetch-depth: 0
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
