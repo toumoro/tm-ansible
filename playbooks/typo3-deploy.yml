@@ -5,17 +5,21 @@
   vars:
     server_username: "{{ lookup('env','SERVER_USERNAME') }}"
     project_client: "{{ lookup('env','PROJECT_CLIENT') }}"
+    github_repository: "{{ lookup('env','GITHUB_REPOSITORY') }}"
     typo3_container: web
     typo3_user: www-data
     typo3_workdir: /var/www
 
   tasks:
     # -------------------------------------------------------------------------
-    # Step 0: Define project root path
+    # Step 0: Define fact
     # -------------------------------------------------------------------------
     - name: Set project root path
       ansible.builtin.set_fact:
         project_root: "/home/{{ server_username }}/www/{{ project_client }}"
+    - name: Set repo
+      ansible.builtin.set_fact:
+        repository_client: "git@github.com:{{ github_repository }}"
     # -------------------------------------------------------------------------
     # Step 1: Move to project root
     # -------------------------------------------------------------------------
@@ -43,7 +47,7 @@
 
     - name: Pull latest code
       ansible.builtin.git:
-        repo: .
+        repo: "{{ repository_client }}"
         dest: "{{ project_root }}"
         update: yes
         force: yes
