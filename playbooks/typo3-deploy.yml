@@ -6,7 +6,7 @@
     server_username: "{{ lookup('env','SERVER_USERNAME') }}"
     project_client: "{{ lookup('env','PROJECT_CLIENT') }}"
     github_repository: "{{ lookup('env','GITHUB_REPOSITORY') }}"
-    typo3_container: web
+    typo3_container: "{{ lookup('env', 'TM_TYPO3_CONTAINER') | default('php-fpm') }}"
     typo3_user: www-data
     typo3_workdir: /var/www
 
@@ -91,7 +91,7 @@
         docker compose exec -T
         -u www-data
         -w /var/www
-        web composer install
+        "{{ typo3_container }}" composer install
       args:
         chdir: "{{ project_root }}"
     
@@ -100,7 +100,7 @@
         docker compose exec -T
         -u www-data
         -w /var/www
-        web ./vendor/bin/typo3 database:updateschema
+        "{{ typo3_container }}" ./vendor/bin/typo3 database:updateschema
       args:
         chdir: "{{ project_root }}"
     
@@ -109,7 +109,7 @@
         docker compose exec -T
         -u www-data
         -w /var/www
-        web ./vendor/bin/typo3 cache:flush
+        "{{ typo3_container }}" ./vendor/bin/typo3 cache:flush
       args:
         chdir: "{{ project_root }}"
     
