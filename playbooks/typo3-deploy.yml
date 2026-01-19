@@ -6,7 +6,9 @@
     server_username: "{{ lookup('env','SERVER_USERNAME') }}"
     project_client: "{{ lookup('env','PROJECT_CLIENT') }}"
     github_repository: "{{ lookup('env','GITHUB_REPOSITORY') }}"
-    typo3_container: "{{ lookup('env', 'TM_TYPO3_CONTAINER') | default('php-fpm') }}"
+    typo3_container: "{{ lookup('env', 'TM_TYPO3_CONTAINER') | default('php-fpm', true) }}"
+    docker_pull_policy: "{{ lookup('env', 'DOCKER_PULL_POLICY') | default('always', true) }}" # options: 'always', 'missing', 'never', 'policy'
+    docker_build_policy: "{{ lookup('env', 'DOCKER_BUILD_POLICY') | default('always', true) }}" # options: 'always', 'never', 'policy'
     typo3_user: www-data
     typo3_workdir: /var/www
 
@@ -58,7 +60,7 @@
     - name: Pull Docker images
       community.docker.docker_compose_v2:
         project_src: "{{ project_root }}"
-        pull: always
+        pull: "{{ docker_pull_policy }}"
 
     # -------------------------------------------------------------------------
     # Step 4: Build containers (no cache)
@@ -66,7 +68,7 @@
     - name: Build Docker containers
       community.docker.docker_compose_v2:
         project_src: "{{ project_root }}"
-        build: always
+        build: "{{ docker_build_policy }}"
 
     # -------------------------------------------------------------------------
     # Step 5: Start containers
