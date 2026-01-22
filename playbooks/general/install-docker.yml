@@ -110,11 +110,21 @@
   when: docker_buildx.stat.exists == False
 
 - name: Verify Docker Compose installation
-  command: docker-compose --version       # Commande introuvble sans l'ajout du chemin dans le PATH de Ansible
+  command: docker compose version
   environment:
     PATH: "{{ ansible_env.PATH }}:/usr/local/bin"
   register: docker_compose_version
 
+- name: Verify Buildx installation
+  command: docker buildx version
+  environment:
+    PATH: "{{ ansible_env.PATH }}:/usr/local/bin"
+  register: docker_buildx_version
+
+- name: Show Docker Buildx version
+  debug:
+    var: docker_buildx_version.stdout
+
 - name: Show Docker Compose version
   debug:
-    var: docker_compose_version.stdout
+    var: docker_compose_version.stdout 
