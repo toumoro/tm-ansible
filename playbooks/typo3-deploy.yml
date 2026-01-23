@@ -88,6 +88,19 @@
     # -------------------------------------------------------------------------
     # Step 7: TYPO3 maintenance commands
     # -------------------------------------------------------------------------
+    - name: Check if database:updateschema exists
+      ansible.builtin.command: >
+        docker compose exec -T
+        -u www-data
+        -w /var/www
+        "{{ typo3_container }}"
+        ./vendor/bin/typo3 list
+      args:
+        chdir: "{{ project_root }}"
+      register: typo3_commands
+      changed_when: false
+      failed_when: false
+
     - name: Composer install
       ansible.builtin.command: >
         docker compose exec -T
@@ -97,7 +110,7 @@
       args:
         chdir: "{{ project_root }}"
     
-    - name: TYPO3 database schema update
+    - name: TYPO3 database schema update via bin/typo3
       ansible.builtin.command: >
         docker compose exec -T
         -u www-data
@@ -105,6 +118,17 @@
         "{{ typo3_container }}" ./vendor/bin/typo3 database:updateschema
       args:
         chdir: "{{ project_root }}"
+      when: "'database:updateschema' in typo3_commands.stdout"
+
+    - name: TYPO3 database schema update via bin/typo3cms
+      ansible.builtin.command: >
+        docker compose exec -T
+        -u www-data
+        -w /var/www
+        "{{ typo3_container }}" ./vendor/bin/typo3cms database:updateschema
+      args:
+        chdir: "{{ project_root }}"
+      when: "'database:updateschema' not in typo3_commands.stdout"
     
     - name: TYPO3 cache flush
       ansible.builtin.command: >
