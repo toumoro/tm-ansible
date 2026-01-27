@@ -83,6 +83,11 @@
     path: /usr/local/bin/docker-compose
   register: docker_compose
 
+- name: Ensure Docker Compose Plugin
+  ansible.builtin.stat:
+    path: /usr/libexec/docker/cli-plugins/docker-compose
+  register: docker_compose_plugin
+
 - name: Download Docker Compose binary
   get_url:
     url: https://github.com/docker/compose/releases/latest/download/docker-compose-linux-x86_64
@@ -95,7 +100,9 @@
     src: /usr/local/bin/docker-compose
     dest: /usr/libexec/docker/cli-plugins/docker-compose
     state: link
-  when: docker_compose.stat.exists == False
+    force: yes
+  when: 
+    - docker_compose_plugin.stat.exists == False
 
 - name: Ensure Docker Buildx is installed
   ansible.builtin.stat:
