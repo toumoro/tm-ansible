@@ -133,3 +133,9 @@
     - name: Deployment completed
       ansible.builtin.debug:
         msg: "Simple TYPO3 Container deployment completed successfully"
+
+    # -------------------------------------------------------------------------
+    # Step 7: TYPO3 schedule tasks
+    # -------------------------------------------------------------------------
+    - name: TYPO3 schedule tasks
+      include_tasks: typo3/scheduler.yml
