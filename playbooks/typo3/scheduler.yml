@@ -1,0 +1,34 @@
+---
+- name: Install TYPO3 scheduler systemd service
+  ansible.builtin.template:
+    src: templates/typo3-scheduler.service.j2
+    dest: /etc/systemd/system/typo3-scheduler.service
+    owner: root
+    group: root
+    mode: '0644'
+  become: true
+  become_user: root
+
+- name: Install TYPO3 scheduler systemd timer
+  ansible.builtin.copy:
+    src: files/typo3-scheduler.timer
+    dest: /etc/systemd/system/typo3-scheduler.timer
+    owner: root
+    group: root
+    mode: '0644'
+  become: true
+  become_user: root
+
+- name: Reload systemd
+  ansible.builtin.systemd:
+    daemon_reload: true
+  become: true
+  become_user: root
+
+- name: Enable and start TYPO3 scheduler timer
+  ansible.builtin.systemd:
+    name: typo3-scheduler.timer
+    enabled: true
+    state: started
+  become: true
+  become_user: root
