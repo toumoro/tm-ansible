@@ -25,6 +25,9 @@ RUN wget https://s3.amazonaws.com/session-manager-downloads/plugin/latest/ubuntu
     dpkg -i session-manager-plugin.deb && \
     rm session-manager-plugin.deb
 
+# Force Ansible config usage
+ENV ANSIBLE_CONFIG=/ansible/ansible.cfg
+
 # Set the working directory
 WORKDIR /ansible
 
