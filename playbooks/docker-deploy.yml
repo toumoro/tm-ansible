@@ -2,6 +2,16 @@
 - name: Deploy Docker Playbook
   hosts: all
 
+  vars:
+    legacy_os_list: # ansible mi-XXXX -i inventory2.ini -m setup | grep -E "ansible_distribution|ansible_distribution_major_version
+      - "SLES 15"
+      - "Debian 9"
+      - "Amazon 2"
+      - "CentOS 7"
+      - "RedHat 7"
+      - "RedHat 8"
+      - "AlmaLinux 8"
+
   pre_tasks:
     - name: Check proxy configuration
       import_tasks: general/configuration-proxy.yml
@@ -17,6 +27,17 @@
     - name: Ensure common packages are installed
       import_tasks: general/install-common-packages.yml
       become: true
+      when: >
+        (ansible_distribution ~ " " ~ ansible_distribution_major_version) not in legacy_os_list
+
     - name: Ensure Docker is installed
       import_tasks: general/install-docker.yml
       become: true
+      when: >
+        (ansible_distribution ~ " " ~ ansible_distribution_major_version) not in legacy_os_list
+
+    - name: Is a legacy OS?
+      debug:
+        msg: "The operating system {{ ansible_distribution }} {{ ansible_distribution_major_version }} is not supported for Docker installation."
+      when: >
+        (ansible_distribution ~ " " ~ ansible_distribution_major_version) in legacy_os_list
