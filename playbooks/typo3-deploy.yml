@@ -64,7 +64,7 @@
         build: "{{ docker_build_policy }}"
         state: present
         wait: true
-        wait_timeout: 300
+        wait_timeout: 600
 
     # -------------------------------------------------------------------------
     # Step 4: Wait for services
