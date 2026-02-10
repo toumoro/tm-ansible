@@ -9,6 +9,14 @@
     projet_client: "{{ lookup('env','CLIENT_PROJECT') }}"
     ansible_aws_ssm_bucket_name: "{{ lookup('env','AWS_SSM_BUCKET') }}"
     ansible_aws_ssm_region: "{{ lookup('env','AWS_REGION') }}"
+    legacy_os_list: # ansible mi-XXXX -i inventory2.ini -m setup | grep -E "ansible_distribution|ansible_distribution_major_version
+      - "SLES 15"
+      - "Debian 9"
+      - "Amazon 2"
+      - "CentOS 7"
+      - "RedHat 7"
+      - "RedHat 8"
+      - "AlmaLinux 8"
 
   pre_tasks:
     - name: Get var from SSM
@@ -24,10 +32,14 @@
     - name: Ensure Common packages are installed
       import_tasks: general/install-common-packages.yml
       become: true
+      when: >
+        (ansible_distribution ~ " " ~ ansible_distribution_major_version) not in legacy_os_list
 
     - name: Ensure Docker is installed
       import_tasks: general/install-docker.yml
       become: true
+      when: >
+        (ansible_distribution ~ " " ~ ansible_distribution_major_version) not in legacy_os_list
 
   tasks:
     - name: Export Database
