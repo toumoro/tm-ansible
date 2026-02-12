@@ -97,7 +97,16 @@
         "{{ typo3_container }}" composer install
       args:
         chdir: "{{ project_root }}"
-    
+
+    - name: Composer repatch
+      ansible.builtin.command: >
+        docker compose exec -T
+        -u www-data
+        -w /var/www
+        "{{ typo3_container }}" composer patches-repatch
+      args:
+        chdir: "{{ project_root }}"
+
     - name: TYPO3 database schema update via bin/typo3
       ansible.builtin.command: >
         docker compose exec -T
