@@ -76,7 +76,7 @@
     # -------------------------------------------------------------------------
     # Step 5: TYPO3 maintenance commands
     # -------------------------------------------------------------------------
-    - name: Check if database:updateschema exists
+    - name: Check which TYPO3 console commands are available
       ansible.builtin.command: >
         docker compose exec -T
         -u www-data
@@ -98,7 +98,20 @@
       args:
         chdir: "{{ project_root }}"
 
-    - name: Composer repatch
+    - name: Check which composer commands are available
+      ansible.builtin.command: >
+        docker compose exec -T
+        -u www-data
+        -w /var/www
+        "{{ typo3_container }}"
+        composer list
+      args:
+        chdir: "{{ project_root }}"
+      register: composer_commands
+      changed_when: false
+      failed_when: false
+
+    - name: Composer repatch if composer patches are available
       ansible.builtin.command: >
         docker compose exec -T
         -u www-data
@@ -106,6 +119,7 @@
         "{{ typo3_container }}" composer patches-repatch
       args:
         chdir: "{{ project_root }}"
+      when: "'patches-repatch' in composer_commands.stdout"
 
     - name: TYPO3 database schema update via bin/typo3
       ansible.builtin.command: >
