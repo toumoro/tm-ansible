@@ -131,6 +131,15 @@
         chdir: "{{ project_root }}"
       when: "'database:updateschema' in typo3_commands.stdout"
 
+    - name: TYPO3 cache flush pre database update
+      ansible.builtin.command: >
+        docker compose exec -T
+        -u www-data
+        -w /var/www
+        "{{ typo3_container }}" ./vendor/bin/typo3 cache:flush
+      args:
+        chdir: "{{ project_root }}"
+
     - name: TYPO3 database schema update via bin/typo3cms
       ansible.builtin.command: >
         docker compose exec -T
