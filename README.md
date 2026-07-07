@@ -13,6 +13,13 @@ These playbooks automate tasks such as:
 - Mounting EBS volumes
 - Starting Solr containers
 
+## How to release
+| Commit Message Format | Release Type Triggered | Version Change Example |
+| :--- | :--- | :--- |
+| `fix: fix a bug with the login button` | **Patch Release** | `1.0.0` → `1.0.1` |
+| `feat: add a new dashboard view` | **Minor Release** | `1.0.0` → `1.1.0` |
+| `feat!: change API response structure`<br>*(Note the `!` or adding `BREAKING CHANGE:` in the footer)* | **Major Release** | `1.0.0` → `2.0.0` |
+
 ## Requirements
 
 - Ansible >= 2.10
