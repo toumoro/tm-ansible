@@ -7,7 +7,7 @@ Requires=docker.service
 Type=oneshot
 WorkingDirectory={{ project_root }}
 
-ExecStart=/usr/local/bin/docker-compose exec -T -u www-data {{ typo3_container }} \
+ExecStart=/usr/local/bin/docker-compose run -u www-data {{ typo3_container }} \
     ./vendor/bin/typo3 scheduler:run
 
 User={{ server_username }}
