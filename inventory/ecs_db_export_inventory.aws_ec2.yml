@@ -5,6 +5,6 @@ filters:
   instance-state-name: running 
   tag:Name: "{{ lookup('env', 'DUMP_INSTANCE_NAME') }}"
 hostnames:
-  - instance_id
+  - instance-id
 compose:
-  ansible_host: instance_id
+  ansible_host: instance-id
