@@ -2,11 +2,9 @@ plugin: amazon.aws.aws_ec2
 regions:
   - "{{ lookup('env', 'AWS_REGION') }}"
 filters:
-  instance-state-name: running 
   tag:Name: "{{ lookup('env', 'DUMP_INSTANCE_NAME') }}"
 hostnames:
-  - instance_id
+  - instance-id
 compose:
-  ansible_host: instance_id
-groups:
-  ecs_db_export_instance: true
+  ansible_host: instance-id
+  ansible_aws_ssm_instance_id: instance-id
