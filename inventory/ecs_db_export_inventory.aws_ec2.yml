@@ -8,5 +8,3 @@ hostnames:
   - instance_id
 compose:
   ansible_host: instance_id
-groups:
-  ecs_db_export_instance: true
