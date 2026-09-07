@@ -7,5 +7,5 @@ filters:
 hostnames:
   - instance-id
 compose:
-  ansible_host: instance-id
+  ansible_host: instance_id
 

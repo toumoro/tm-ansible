@@ -4,7 +4,8 @@ regions:
 filters:
   tag:Name: "{{ lookup('env', 'DUMP_INSTANCE_NAME') }}"
 hostnames:
-  - instance-id
+  - ssm-target
 compose:
-  ansible_host: instance-id
-  ansible_aws_ssm_instance_id: instance-id
+  ansible_host: instance_id
+  ansible_aws_ssm_instance_id: instance_id
+  ansible_aws_ssm_bucket_name: "{{ lookup('env', 'AWS_SSM_BUCKET') }}"
