@@ -5,7 +5,7 @@ filters:
   instance-state-name: running
   instance-id: "{{ lookup('env', 'TM_INSTANCE_ID') }}"
 hostnames:
-  - instance-id
+  - ssm-target
 compose:
   ansible_host: instance_id
   ansible_aws_ssm_instance_id: instance_id
