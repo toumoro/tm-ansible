@@ -1,0 +1,12 @@
+- name: Change ec2 instance state
+  hosts: all
+  connection: local
+  gather_facts: false
+  vars:
+    ansible_connection: local
+  tasks:
+    - name: Update state
+      amazon.aws.ec2_instance:
+        instance_ids:
+          - "{{ ansible_host }}"
+        state: "{{ state }}"
