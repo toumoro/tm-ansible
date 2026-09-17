@@ -4,6 +4,8 @@
   gather_facts: false
   vars:
     ansible_connection: local
+    ansible_python_interpreter: /usr/local/bin/python3
+    ansible_interpreter_python_fallback: python3
   tasks:
     - name: Update state
       amazon.aws.ec2_instance:
