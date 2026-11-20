@@ -1,10 +1,17 @@
+# Tables exclues du dump « partial ». DUMP_INCLUDE_TABLES (liste séparée par des virgules)
+# en réinclut certaines pour un projet, ex. sys_file_storage pour les environnements DDEV.
 - name: List of tables to exclude from mysqldump
   set_fact:
-    exclude_tables:
+    default_exclude_tables:
       - be_users
       - sys_domain
       - sys_file_storage
       - sys_history
+    include_tables: "{{ (lookup('env', 'DUMP_INCLUDE_TABLES') | default('', true)).split(',') | map('trim') | select | list }}"
+
+- name: Remove re-included tables from the exclusion list
+  set_fact:
+    exclude_tables: "{{ default_exclude_tables | difference(include_tables) }}"
 
 # NE PAS AFFICHER LA COMMANDE EN PRODUCTION
 # - name: Debug
